@@ -1,0 +1,43 @@
+git
+分支
+撤销暂存区
+git restore -- stage filename 
+git reset HEAD filename 撤销工作区数据
+可以使用 git reset --hard HEAD^  撤销commit
+git reset --hard 版本号  返回到指定版本
+
+版本库
+git lol 查看有效命令
+git log (--online)查看版本号（一行显示，但只显示当前用户之前的版本）
+git refog 查看所有历史命令
+
+git commit -m ""
+git commit --amend
+
+开发用的分支
+git branch  dev 创建分支（不加参数是查看）
+git checkout dev 切换分支
+git log --oneline (--graph)所有的版本记录(图像)
+
+git merge 分支a 分支B
+
+1.fast-forwar 快速合并
+主分支没有动，其他分支有改变
+git checkout master
+git merge dev
+
+2.recursive strategy
+1).git branch master
+	git merge dev
+2).解决冲突
+	1.手动修复
+	2.git add 解除merging状态
+
+git remote add origin “远程库” 定义远程库
+git push origin master 推送master分支到远程库
+
+
+fetch+merge == pull
+
+fork 
+pull request 跨团队合作
