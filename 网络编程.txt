@@ -1,0 +1,37 @@
+网络编程
+	osi:应用层-表示层-会话层-传输层-网络层-数据链路层-物理层
+	tcp/ip：应用层-传输层-网络层-网络接口
+	
+	tcp/ip实际的分层
+	
+	ipv4:32位
+	ipv6:128位
+	
+/**
+ *InetAddress:
+ *  静态方法
+ *  getByLocal:本机
+ *  getByName:根据域名DNS|IP地址--》Ip
+ *
+ *  两个成员方法
+ *  getHostName返回计算机名
+ *  getHostAddress 返回地址
+ */
+
+/**
+ *InetSocketAddress:参数：Ip地址+端口
+ *  两个成员方法
+ *  getHostName返回计算机名
+ *  getAddress 返回地址
+ *  getPort
+ */
+ 
+ 网络三大基石：html,http,url
+ 
+ UDP TCP
+ 
+ UDP
+	DatagramPacket -网络包
+ TCP
+	请求-相应模式
+	

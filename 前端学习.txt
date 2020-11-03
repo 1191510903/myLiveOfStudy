@@ -1,0 +1,502 @@
+学习Node.js的目的就是帮助大家打开服务端这个黑盒子
+npm 是世界上最大的生源生态系统
+绝大多数js相关的包都存放在npm上
+
+npm init -y可以快速生成
+npm intall
+npm install -save 包名
+	下载并且保持依赖项(package.json文件中的dependencies选项)
+		简写：npm i -S
+npm uninstall -save
+		         npm -un -S
+npm help 用户手册
+
+path 模块提供了一些用于处理文件路径的小工具
+require() 用于引入模块、 JSON、或本地文件
+var require("path")
+__dirname 变量 是以文件所处的路径为值
+Node.js中，__dirname总是指向被执行js文件的绝对路径
+所以当你在/d1/d2/myScript.js文件中写了__dirname,它的值就是/d1/d2
+
+Node.js 提供了 exports 和 require 两个对象，
+其中 exports 是模块公开的接口，require 用于从外部获取一个模块的接口，
+即所获取模块的 exports 对象。
+
+require方法接受以下几种参数的传递：
+http、fs、path等，原生模块。
+./mod或../mod，相对路径的文件模块。
+/pathtomodule/mod，绝对路径的文件模块。
+mod，非原生模块的文件模块。
+
+函数套函数
+var a = function(name){
+	console.log();
+}
+
+var b = function(someFucntion,value){
+	someFucntion(arg);
+}
+
+b(a,'name');
+
+b中的someFunction会自动调用a的函数并把value参数赋予name
+
+react
+export default function a(){}
+import
+
+node
+module.export
+require
+===============================================================
+react
+DOM的本质：浏览器中的概念，用JS对象来表示页面上的元素，并提供DOM对象的API
+什么是React中的虚拟DOM：框架的概念，程序员用JS对象来模拟页面中的DOM和DOM嵌套
+实现页面中DOM元素的高效更新
+
+Dom树
+1.浏览器请求服务器获取页面html代码
+2.浏览器要现在内存
+
+DIFF算法
+tree diff:新旧两颗DOM树，逐层对比的过程就是treeDIFF
+component diff:在进行TREE Diff的时候，每一层中，
+组件级别的对比
+如果对比前后，组件的类型相同，则暂时认为组件不需要更新
+element diff：如果两个组件类型相同，则需要进行
+元素之间的对比
+
+
+
+react 创建组件，创建虚拟Dom,管理生命周期
+ReactDom  虚拟DOM渲染
+//1.创建虚拟DOM元素
+//参数1：创建的元素类型，字符串，表示元素的名称
+//参数2：是一个对象或null，表示这个DOM元素的属性
+//参数3：子节点
+//参数n：其他子节点
+const myh1 = React.createElement('h1',null,'这是一个大大的H1');
+//使用ReactDom把虚拟DOM渲染到页面上
+//参数1：要渲染的那个虚拟元素
+//参数2：指定 页面上的一个容器
+ReactDom.render(myh1,document.getElementById('app'));
+
+在JS中，混合写入类似于HTML的语法，叫做JSX语法，符合XML规范的JS
+注意：JSX语法的本质，还是在运行的时候，被转换成了React.createElement形式来执行的
+安装bable
+
+运行 npm install babel-core babel-loader babel-plugin-transform-runtime -D
+运行 npm install babel-preset-env babel-preset-stage-0 -D
+	
+ npm init-y 快速初始化项目
+在项目根目录创建src源代码和dist文件目录
+在src目录下创建index.html
+使用cnpm 安装webpack,运行cnpm i webpack -p
+使用babel
+
+@相当于项目根目录下的src（绝对路径）
+    alias:{
+        '@':path.join(__dirname,'./sec')
+
+
+创建组件
+props
+//不论是Vue还是React，组件中的Props永远都是只读的，不能被赋值
+创建组件
+	function Hello(){
+		return  <div>Hello 组件</div>
+	}
+
+为组件传递数据
+
+	//使用组件并为组件传递props数据
+ 	1.<Hello {...dog}></Hello>
+	2.<Hello name={dog.name} age={dog.age} gender={dog.gender}></Hello>
+	//在构造函数中，使用props形参，接受外界传递过来的数据
+	function Hello(props){
+		return <div>{props.name}--{props.age}--{props.gender}</div>
+	}
+
+
+class Animal{
+    //这是类中的构造器
+    //每个类中，都有一个构造器，默认是隐藏的
+    constructor(name,age){
+    //构造器的作用就是，每当new这个类的时候，优先执行
+    //实例属性
+        this.name=name;
+        this.age=age;
+    }
+    static info = 'eee'
+   //实例方法
+    jiao(){
+        console.log("giaogiaogiaogiao")
+    }
+}
+//【静态属性】：通过构造函数，直接访问到的熟悉，叫做静态属性
+console.log('静态属性',Animal.info)
+
+在class内只能写构造器、静态方法和静态变量
+基于class关键字创建组件
+如果要使用class定义组件，必须要继承
+class 组件名称 extends React.Component{
+	render(){
+		return <>
+		}
+		
+	}
+
+
+使用class关键字创建的组件，有自己的私有数据(this.state)和生命周期
+使用function创建的组件只有props，没有自己的私有数据和生命周期函数
+1.用构造函数创建出来的组件：叫做“无状态组件”
+2.class关键字创建处理的组件：叫做“有状态组件”
+
+3.如果一个组件需要有自己的私有数据，则推荐使用：class创建的有状态组件
+4.如果一个组件不需要私有的数据，则推荐使用：无状态组件
+5.组件中props和state/date之前的区别
+	props中的数据都是外界传递的
+	state/date中的数据，都是组件私有的
+	（通过ajax获取回来的数据）
+	props只读不可变
+	state/data中的数据是可读可写的
+
+map(item,index)遍历list
+es6语法函数缩减写法	=>{ return }  == function(){
+												return
+												}
+
+css渲染
+内部样式表
+style={{color:'red',fontSize:'1px'}}
+导入外部样式表：不外暴所以不是一个对象
+但是直接导入的css样式表，默认是在全局，整个项目都生效！
+下载style-loader 和css-loader解析
+
+console.log(cssobj);
+className ="title"
+use:['style-loader','css-loader?modules']} 追加参数
+为普通的css样式表的第三方模块化，使得样式表有属性
+/**
+	css模块化，只针对类选择器和ID选择器生效  .a{} #{}
+	css模块化不会将标签选择器模块化
+*/
+className={title}
+
+css-loader?modules?localIdentName[path][name][local][hash:length]
+								   路径  文件名  属性  hash值防止类名重复
+
+:global(.test){}  全局生效不模块化
+：local() 被模块化，默认是被模块化的
+
+如果在引用某个包的时候，这个包被安装到了node_modules目录中
+则可以省略node_modules这一层目录直接以包名开始引入自己的模块或者样式表
+
+第三方的样式表都是以.css结尾，这样我们不要为普通的.css启动模块化
+自己定义的css文件叫做.scss或.less结尾 
+
+在项目中启动模块化并同时使用bootstrap
+1.把自己的样式表，定义为.scss或.less
+2.将自己的文件进行模块化
+3.引用bootstrap文件
+
+
+普通函数谁调用指向谁
+箭头函数=>看当前的环境，如果环境是window this指向的就是window
+/**
+在React中，有一套自己的时间绑定机制，事件名：onClick={function(){}}
+ {/**onClick直接受function作为处理函数 */}
+**/
+
+ render(){
+        return <div>BtnBind组件
+        <button onClick={()=>{this.myclickHandler()}}>别摸我</button>
+        </div>
+    }
+    myclickHandler(){
+        console.log('2222222222222')
+    }
+	设置状态值（双向绑定）
+	this.setState({
+            msg:'111'
+        })
+	//setState()方法的执行，是"异步"的
+	//如果大家在调用完this.setState之后，又想立即拿到最新的
+	//state值，需要使用this.setState({},callback)
+	 this.setState({
+            msg:'111'
+        },function(){
+            console.log(this.state.msg)
+        })
+	区域折叠
+	//#region  
+
+	//#endregion	
+		{
+         /**
+          * 如果我们只是把文本框的value属性
+          * 绑定到了state状态，但是如果不提供onchange处理函数的话
+          * 得到的文本框将会是一个只读的文本框
+          */
+        }
+        {
+          /**
+           * 当为文本框绑定value值以后，要么同时提供一个readOnly，要么提供一个onChange处理函数
+           */
+        }
+		<input type="text" style={{width:'100%'}} value={this.state.msg} readOnly/>
+        
+		
+<input type="text" style={{width:'100%'}} value={this.state.msg} onChange={()=>this.txtChanged()}/>
+//没当文本框的内容变化时，一定会调用
+    txtChanged=()=>{
+        console.log("ssss")
+    }
+	
+	在angular里面试一下！！HTML DOM contentEditable 属性可编辑属性！
+两种给inpur文本框赋值的
+
+1.<input type="text" style={{width:'100%'}} value={this.state.msg} onChange={(e)=>this.txtChanged(e)} ref="txt"/>
+2.//每当文本框的内容变化时，一定会调用
+    txtChanged=(e)=>{
+		第一种
+		====================================
+        //在onChange时间中，获取文件框的值
+        // var a = e.target.value
+        // console.log("===",e.target.value);
+        // this.setState({
+        //     msg:e.target.value
+        // })
+		第二种
+		====================================
+        console.log("txt",this.refs.txt.value)
+        this.setState({
+            msg:this.refs.txt.value
+        })
+    }	
+每次触发DOM事件时会产生一个事件对象（也称event对象）
+，此处的参数e接收事件对象。
+而事件对象也有很多属性和方法，其中target属性是获取触发事件对象的目标，
+也就是绑定事件的元素，e.target表示该DOM元素，然后在获取其相应的属性值。
+
+组件的生命周期
+每个组件的实例，从创建到运行直到销毁，在这个过程中
+	
+webpack和grunt的区别
+
+打包工具
+
+push 返回数组的长度
+
+= == ===
+=变量赋值
+== 判断是否相等
+=== 强转类型判断相等（严格判断）
+
+Prop 验证
+随着应用不断变大，保证组件被正确使用变得非常有用。
+为此我们引入propTypes。React.PropTypes 提供很多验证器 (validator) 来验证传入数据的有效性。
+当向 props 传入无效数据时，JavaScript 控制台会抛出警告。
+注意为了性能考虑，只在开发环境验证 propTypes。
+propTypes
+
+生命周期
+组件调用周期
+constructor()
+static getDerivedStateFormProps() 
+render()
+react更新dom和refs
+componentDidMount()
+
+值变化触发组件更新
+1.state
+2.props
+3.强制更新forceUpdate()
+
+组件更新周期
+getDerivedStateFormProps()
+shouldComponentUpdate()
+render()
+getSnapshotBeforeUpdate()
+react更新dom和refs
+componentDidUpdate()
+
+组件删除周期
+componentWillUnmout()
+========================================
+ajax请求
+
+axios
+ cnpm install axios -S
+ 
+const ajax = axios.create({
+    baseURL:apis.baseURL
+})
+  
+//在这里还会做一些全局的拦截器处理
+export const getTodos =()=>{
+    return ajax.post(apis.todos)
+}
+
+const a = this.state.isLike
+this.setState({a})
+
+-------------------------------------
+全局挂载
+import * as services from './services'
+import App from './App'
+React.Component.prototype.http = services;
+
+  componentDidMount(){
+        console.log(this.http)
+    }
+--------------------------------------
+const 
+声明常量
+1.一定要附初始值
+2.常量使用大写
+3.常量的值不能修改
+4.块级作用域
+5.对于数组和对象的元素修改，不能做对常量的修改
+-----------------------------------------
+es6允许按照一定模式从数组和对象中提取值，对变量进行赋值
+const zhang={
+	xiaopin:function(){
+			console.log("sss")
+	}
+}
+
+let {xiaopin} = zhao
+xiaopin();
+------------------------------------------------
+添加``声明字符串的方式---模板字符串
+1.声明
+2.可以出现换行符
+3.变量拼接
+let love = 'zhang'
+let out = `${love} is a good man`
+-----------------------------------------------
+简化对象
+let name ='1'
+let change = function(){
+}
+const school ={
+	name,
+	change,
+	improve(){
+		
+	}//方法声明简写
+}
+--------------------------------------------------
+箭头函数
+1.this是静态的，this始终指向函数声明时所在作用域下的this的值
+call 可以调整作用域
+2.不能作为构造实例化对象
+3.不能使用arguments变量
+4.箭头函数的简写  1）只有一个参数的时候省略小括号
+				  2）省略花括号，当代码只有一行的时候，return也没有
+					返回值就是那行代码！！固定的返回！！必然返回！！
+----------------------------------------
+给函数参数赋值初始值
+...
+rest参数必须放在参数后
+
+[...]扩展运算符
+转换成参数序列
+
+------------------------------
+迭代器
+const xiysou = ['唐僧','猴子','你爹']
+for( let v of args)
+for (let v in args)
+----------------------------------
+生成器特殊的函数
+异步编程
+function * gen(){
+	yield '1';
+	yield '2';
+	yield '3';
+}
+
+let iterator = gen();
+console.log(gen.next())
+function a(arg){
+	return
+}
+
+-----------------------------------------------
+promise
+
+resolve()调用成功
+
+reject()调用失败
+-------------------------------------
+通用的导入方式
+import * as m1 from "./src"
+
+2.解构赋值形式
+import {school,teach} from "./src"
+
+3.简便形式，针对默认暴露
+import m3 from "./src"
+---------------------------------
+async 函数 
+返回的是promise 类型的对象
+throw new Erro()返回一个错误的promise
+
+await 本身返回的就是promise返回成功的数据resolve()输出
+
+try .. catch catch捕捉promise错误的返回，reject()输出返回
+
+-------------------------------------
+?.  判断是否存在如果不存在则选后一个参数
+-------------------------------------
+hook
+//useState是一个方法，这个方法的参数就是默认值，结果是一个数组
+数组第一个就是state 第二个就相当于setState
+const [count,setCount] =useState();
+setCount();
+  <buttononClick={()=>{setCount(count-1)}}>-</button>
+         <span}>{count}</span>
+  <button onClick={()=>{setCount(count+1)}}>+</button>
+
+useEffect  使用hook监听 回调函数，不管是组件挂载还是更新，都会触发回调方法
+
+ useEffect(()=>{
+        console.log("更新了！！")
+    })
+--------------------------------------
+context
+
+{this.props.children} 可以在原本的组件内添加内容，组件
+
+createContext() 
+是react提供的一个用于跨组件传值的方法
+Provider 提供状态
+Consumer 接受状态
+
+const {
+	Provider:
+	Consumer:
+}
+
+使用Provider必须有个value值，可以传递任何值
+注意consumer的children必须是一个方法
+方法有一个参数就是Provider的value
+----------------------------------------
+HOC:高阶组件  Higher-Order-Component
+高阶组件
+
+CRA支持@装饰器写法
+1.使用react-app-rewired进行轻微调整
+----------------------------
+redux 
+唯一数据源
+状态时只读的
+数据的改变必须通过纯函数完成
+纯函数
+
+-----------------------------------
+路由
+注册路由
+route 映射关系

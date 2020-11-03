@@ -1,0 +1,117 @@
+消息中间件
+
+MQ:消息中间件
+activemq
+
+1.在何种场景下使用消息中间件
+2.为什么引用消息中间件
+
+作用：
+解耦，削峰，异步
+
+
+高可用,高性能，可伸缩，易用和安全
+异步消费和处理
+控制消息的消费顺序
+整合框架
+集合配置
+
+activeMQ默认端口是61616 提供JMS服务
+ps -ef|grep activemq | grep -v grep  简化信息
+
+ip:8161/admin/  8161提供管理控制台
+admin
+admin 默认账号密码
+
+点对点的消息传递域中，目的地被称为队列queue
+在发布订阅消息域中，目的地被称为主题topic
+
+tcp://ip:端口
+
+1.创建连接工厂
+2.连接connection，并启动访问
+3.创建会话session
+4.创建目的地topic/queue
+5.创建消息的生产者 MessageProducer producer=session.createProducer(queue)
+6.通过messageProducer生成消息发送dao MQ的队列里面
+7.TextMessage t =session.createTextMessage("sss");
+8.发送消息producer.send(t);
+9.关闭资源
+
+消费者
+同步阻塞方式
+MessageConsumer consumer = session.createConsumer(queue)
+TextMessage message = (TextMessage)consumer.receive(); 一直等待
+receive(Long time); 时间限制
+
+通过监听的方式来接受消息
+consumer.setMessageListener(new MessageListener(){
+	public void onMessage(Message message){
+		
+	}
+})
+System.in.read();保持控制台不灭
+
+消费者三种情况
+1.先生产 启动消费者
+2.先生成 启动1号消费者，启动2号消费者不能接受消息
+3.先启动两个消费者，再启动一个生产者
+	结果：平均aa分配
+JMS开发的基本步骤
+
+topic
+先启动消费者后启动生产者
+
+javaEE :13个规范工业规范
+JMS 
+两个应用程序之间进行异步通信的API
+
+JMS prodiver 中间件
+JMS producer 生产者
+JMS consumer 消费者
+JMS message 消息
+	消息头
+		1.JMSDestination 目的地
+		2.JMSDeliveryMode 	持久非持久
+		3.JMSExpiration 过期时间
+		默认永不过期
+		4.JMSPriority 优先级
+		0-9 0-4普通 5-9加急
+		默认是4
+		5.JMSMessageID 唯一识别号
+	消息属性
+		去重/识别/重点标注
+	消息体
+		1.TextMessage
+		2.MapMessage key-string value
+		3.ByteMessage
+		4.StreamMessage
+		5.ObjectMessage
+
+消息的可靠性
+	1.持久:默认是持久（可靠性为主）
+	2.事务 
+	3.
+	4.broken
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+

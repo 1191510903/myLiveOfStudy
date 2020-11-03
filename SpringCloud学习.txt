@@ -1,0 +1,35 @@
+独立运行的进程
+
+基于分布式的微服务架构
+
+spingboot 2.x 和springcloud H版
+
+spring cloud hSR1
+spingboot 2.2.2
+cloud alibaba 2.1.0
+
+cloud升级
+服务注册中心：eureka/zookeeper√/consul/Nacos√
+服务调用：ribbon/loadBalancer
+服务调用2：feign/openFeign√
+服务降级：Hystrix/resilience4j√/sentienl√
+服务网关:zuul/gateway
+服务配置:nacos
+服务总线:nacos
+
+构建
+	1.约定》配置》编码
+	脑图：
+		1.new Project
+
+
+微服务模块
+1.建module
+2.改pom
+3.写YML
+4.主启动
+5.业务化
+
+	yml
+
+
