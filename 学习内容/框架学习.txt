@@ -1,0 +1,5 @@
+session共享问题
+1.tomcat复制
+2.nginx ip_hash
+3.redis mongodb存储
+4.使用token cookie代替session

@@ -1,362 +1,449 @@
-DBMS_OUTPUT.put_line( 'putline====== ');
-plsql 控制台输出数据
+redis学习
+开启：redis-server redis-conf
+	  redis-cli开启客户端
 
-mysql 查询优化
+数据类型：string(字符串)、list(链表)、set（集合）【zset】、sorted set（有序集合）、hash（哈希类型）
+配合关系型数据库做告诉缓存
 
-内部结构
-1.连接层
-2.业务服务处理层
-3.数据存储引擎层（存储引擎）
-4.文件存储层
-优点：分层可拔插
+最新N个数据-------------通过List实现按自然时间排序的数据
+排行榜------------------利用zset（有序集合）
+失效性的数据------------expire过期
+计数器，秒杀------------原子性，自增方法incr、decr
+去除大量数据中的重复数据-利于set集合
+构建队列----------------利用list集合
+发布订阅消息系统--------pub/sub模式
 
-常用的引擎：innodb 和 myisam
+redis-benchmark：性能测试工具，可以再自己本子运行，看看性能如何（服务启动起来后执行）
+redis-check-aof：修复有问题的aof文件
+redis-check-dump:修复有问题的dump.rdb文件
+redis-sentinel：Redis集群使用
+redis-server：Redis服务器启动命令
+redis-cli:客户端，操作入口
+------------------------------------------------
+redis是单线程+多路IO复用技术
+阻塞IO：
+非阻塞IO：
+IO多路复用：select（限制数量） poll（监视不限数量） epoll(设置标识符)
+多路IO复用技术是指使用一个线程来检查多个文件描述符（Socket）的就绪状态，比如调用select和poll
+函数，传入多个文件描述符，如果有一个文件描述符就绪，则返回，否则阻塞直到超时。得到就绪状态后
+进行真正的操作可以在同一个线程里执行，也可以启动线程执行（线程池）
+-----------------------------------------------
 
-优化分析：
-1)性能下降sql慢
-	1.查询语句写的烂
-	2.索引失效
-		单值
-		复合
-	select * fron u where name='' and emai='';
-	create index  idx_usr on user(name,emai);
-	
-	查看表索引
-	show index from table_name（表名）
-	3.关联查询太多join（设计缺陷或不得已的需求）
-	4.服务器调优及各个参数设置（缓冲，线程数等）
-join查询顺序
-	手写：
-	机读：from -->on -->where -->group by -->having -->select -->distinct-->order by -->limit
-	总结：
-	
-	from --> on --> join --> where --> group by --> having -->select -->order by 
-	
-select from a inner join b on a.key =b.key
-select from a left join b on a.key = b.key
-select from a right join b on a.key = b.key
+------------------------------------------------
+默认使用0号部数据库（总共16个）
+select + num 换数据存储部
 
-7种join连接
+exit/ctrl+C  退出(关闭客户端)
+ping 查看是否连接成功 返回pong成功
+shutdown/redis-cli shutdown关闭服务端
 
-什么是索引？
-	mysql 索引分裂 index 索引是高效得到数据的数据结构
-	索引目的在于提高查询效率，可以类比字典
-	“排好序的快速查询数据结构”
-	
+
+redis数据类型  ====redis中只能存字符串
+		string
+		set
+key  +  list
+		hash
+		zset
 		
-	
-2)执行时间长
-3)等待时间长
-1.添加索引
-2.
-
-
-innodb两大类索引
-	聚集索引：主键id
-	普通索引
-
-①回表查询
-select * from table where index_A=''
-②索引覆盖 explain 显示using index
-
-explain 显示执行计划包含的信息
-
-select 
-	1.id`查询顺序 
-		1.id相同，根据id顺序从上到下
-		2.id不同，子查询id值越大优先级越高，越先被执行
-	derived 衍生虚表
-	同级顺序，不同级越大越优先
-	2.select_type查询类型{
-			1.simple
-			2.primary 最外层是子查询语句
-			3.subquery 包含子查询
-			4.derived 临时表
-			5.union union第二个select
-			6.union result Union合并查询结果
-    3.table 查询的表
-	3.type 访问类型
-		system》const>eq_ref>ref>range>index>all
-		保证查询知多少到range级别，最好在ref
-		system 
-		const 常量 where id=1
-		eq_ref 唯一索引值
-	  ！ref 非唯一性索引扫描，查询和扫描的混合体
-	  ！range where中出现了between < > 
-	  ！index 只遍历了索引树
-		all 全表扫描  --这个时候尝试优化
-	4.possible_keys 
-		是否使用了索引 ：sql存在的索引，索引的东西被列出
-	5.key
-		最终实际使用了什么索引
-			null 没有使用索引
-			使用覆盖索引，出现在key中
-	6.key_len
-		表示索引中使用的字节数，可通过该列计算查询中使用索引的长度
-		在不损失精确性的情况下，长度越短越好
-		索引字段的最大可能长度，并非实际使用长度
-	7.ref 
-		显示索引列数使用情况 
-	8.rows
-		大致估算出所需记录所需要读取的行数
-	9.extra 
-		包含不合适在其他列中显示但十分重要的额外信息
-			using filesort 出现外部排序 需要优化sql
-			using temporary 使用临时表   需要立刻优化sql
-			using index  使用了覆盖索引，效率很高 
-			如果出现using where ，表明索引用来读取数据而非执行查询动作
-			using where
-			using join buffer  使用连接缓存
-			impossble where 
-			select table optimized away
-			distinct 优化distinct操作，在找到第一匹配的元组后即停止找同样值
-	索引的建立优化
-			索引优化
-				范围的参数不能做索引，否则失效，引起filesort
-				两个表
-				左右连接索引相反加
-				三个表
-				连接表加索引
-	（永远用写结果集驱动大结果集）
-	（优化内层循环）
-	（保证Join后面条件加索引）			
-索引失效
-	1)最佳左前缀法则：
-	如果索引了很多列 ，要遵守最左前缀法则。指的是查询从索引的最左前列开始并且不跳过索引中的列
-	2)不在索引上做任何操作（计算函数（自动or手动）类型转换），会导致索引失效而转向全表扫描
-	
-	1.全值匹配我最爱    
-	2.带头大哥不能死，中间兄弟不能断
-	3.索引列上少计算 
-	4.范围之后全失效  > < in like betweent
-	5.尽量使用覆盖索引（只访问索引的查询（索引列和查询一致））减少select *
-	6.使用！= 或 <> 无法使用索引会导致全表扫描
-	7.is null 和 is not null 不能使用索引
-	8.like 索引失效（%加右边索引才不会失效，后面也会生效），后面的条件也会失效
-		使用覆盖索引可以使索引生效
-	9.对于连续的数值，能用 between就不要用 in
-	10.字符串varchar一定要加''
-	11.少用or
-	
-	小总结
-		：sql内部优化
-		order by 会导致索引失败，全局排序，除非参数是一个定值在where中的条件
-		group by 分组之前必排序
-			会有临时表
-	一般建议：
-		对于单值索引，尽量选择针对当前query过滤性更好的索引
-		在选择组合索引的时候，当前query中过滤性最好的字段在索引字段顺序中，位置越靠前越好
-		在选择组合索引的时候，尽量选择可以能够包含当前query中的where子句中更多字段的索引
-		尽可能通过分析统计信息和调整query的写法来达到选择合适索引的目的
+		keys * 查看所有键
+		exists 判断键是否存在
+		type   判断键中值的类型
+		del 	删除键
+		expire 设置过期时间 expire a 10 
+		ttl 	查看还有多少秒过期  -1代表永不过期，-2代表已经过期
+		dbsize 	查看所在表中的值数量
+		Flushdb 清空当前库----}
+								尽量不用！！
+		Flushall 通杀全部库---}
+------------------------------------------------		
+String	
+	string 不能超过512M
+		get 获取键的值
+		append 追加
+		strlen 获取值的长度
+		setnx NULL赋值 不为null不赋值（分布式锁中出现）
+		incr  将key中存储的数字值增1
+		decr  将key中存储的数字值减1
+		incrby/decrby  将key中存储的数字值增/减长度
+		mset <key1> <value1> <key2><value2>  同时设置多个值
+		mget <key1><value1>  <key2><value2>  同时获取多个值
+		msetnx 当且仅当都不存在时设置值
+		getrange  获取值的范围  类似substring但是【】
+		setrange  覆盖值的范围  set a 5 abc
+		setex 设置值的同时，设置过期时间  setex a 10 b
+		getset 设置了新值的同时获取旧值
 		
-		
-		口诀
-			全职匹配我最爱，最左前缀要遵守
-			带头大哥不能死，中间兄弟不能断
-			索引列上少计算，范围之后全失效
-			like百分写最右，覆盖索引不写星
-			不等空值还有or，索引失效要少用
-	mysql底层会对符合的数据进行类型转换成符合条件的查询，但条件是索引失效
-	例如：select * from user where user_id='1'; user_id设置为varchar
-		  select * from user where user_id=1; 这样也是可以查出来的，底层进行了类型转换
- 查询优化	
-		1.explain
-	------------
-		分析
-		开启慢查询日志，设置阈值，将数据拿出来
-		explain+慢sql分析
-		show profile 查询服务器中sql执行细节和生命周期情况
-		sql数据库服务器参数调优
-		
-		优化原则：小表驱动大表，即小的数据驱动大的数据集
-		select * from a where id in (select id from B)
-		当b表的数据集必须小于a表的数据集时，用in优于exsits
-		select * from A where exsits (select i from N where B.id=A.id)
-		当A表的数据集小于B表的数据集时，用exists优于in
-	注意：A表和B表的ID字段应建立索引
-	
-	exists
-		将查询的数据，放到子查询查询数据，根据
-	单路，先对order by 排序
-	order by 子句，尽量使用index方式排序，便面使用filesort方式排序
-	尽可能在索引列上完成排序操作，遵守索引建的最佳左前缀
-	如果不在索引列上，filesort有两种算法
-		mysql 就要启动双路排序和单路排序	
-	优化策略：
-		增大sort_buffer_size参数
-	
-order by 
-	双路排序
-	单路排序
-	
-	1.order by 不要用*
-	2.增加sort_buffer_size
-	3.增大max_length_for_sorted_Data参数的设置
-	
+		1成功 0失败 原子性
+		mset user:1:name zhangsan user:1:age 2
+		mget user:1:name
 
-	10秒中以后的都是慢查询
+------------------------------------------------------		
+		
+List：从头到尾是0，1，2，3 从尾到头 -1，-2，-3，-4，-5
+		头0 ， 尾 -1
+	redis列表是简单的字符串列表，按照插入顺序排序，你可以添加一个元素到列表的头部或者尾部
+	
+	lpush key value1 value2 从左边/右边插入一个或多个值
+	rpush key value1 value2 
+	lpop/rpop key 1.从左边/右边吐出一个值 2.值在键在，值光键亡
+	rpoplpush key1 key2  将右边的值吐出来给另一个的左边插入值
+	lrange key <start> <stop> 按照索引下标获取元素（从左边到右边） lrange 0 -1 查询所有
+	lindex key <index> 索引获得元素
+	llen key 获取列表长度
+	linsert  key after value newValue 在value后面插入新值 
+	lrem key n <value> 从左边删除n个value  n=0 删除所有 
+	ltrim  list 1 2 裁剪出
 ---------------------------------------------------
-mysql 排序方式：文件排序或扫描索引排序
-mysql 能为排序与查询使用相同的索引
+set（集合）
+set中的值是不能重复的
+sadd key value 添加值
+smember key 查看值
+sismember 是否存在某个值
+scard 获取集合中的个数
+srem key value 删除
+srandMemeber 随机抽选元素
+spop 随机删除元素
+smove myset myset1 hello 把myset中hello放入到myset1中
+差集
+交集
+并集
+sdiff key1 key2
+sinter key1 key2
+sunion key1 key2
+无序不重复
+
+-------------------------------------------------
+hash 哈希类型
+map集合 key-map集合 
+
+hset 设置·一个字段值
+hset set1 1 2 3 5 设置多个字段值
+hget 获取一个字段值
+hmset 
+hmget 
+hgetall
+hdel 删除键值对
+hexists 是否存在某个值
+hkeys myhash
+hkeys myhash
+127.0.0.1:6379> hvals  myhash
+1) "word"
+127.0.0.1:6379> hsetnx myhash field3 hello
+(integer) 1
+127.0.0.1:6379> hsetnx myhash field4 hello
+
+更适合存储对象
+
+------------------------------------------------
+zset 有序集合
+zset myset score k1  score k2 score k3
+127.0.0.1:6379> zadd myset 1 one  添加单个值
+(integer) 1
+127.0.0.1:6379> zadd myset 2 two 3 three 添加多个值
+zadd zset1 60 v1 70 v2 80 v3
+
+zrange 0 -1 查看范围
+ zrangebyscore zset1 -inf +inf withscore
+ 从负无穷到正无穷（带key）
+ -inf +inf 可以设置具体的数字
+ 
+ zrem zset1 key 移出
+ zcard zset1 集合数量
+ zrevrange zset1 0 -1 从大到小查询
+ zcount myset1 1 3 获取集合范围值的数量
+
+------------------------------------------------
+
+原子性
+	不会被线程打断/中断只能发生于指令之间
+------------------------------------------------
+geospatial  
+	可以推算地理位置的信息，两地之间的句丽
+	geoadd
+		添加地理位置
+	两级无法直接添加
+	geopos 
+		获取指定的经度纬度
+	geodist key loaction1 loaction2 单位
+		获取两个位置的实际距离
+	georadius
+	功能：获得所有附近的人的地址、距离，通过半径来查询
+	georadius china:city 110 30 1000 km withcoord 		withdist      count 2 
+									 精度   经纬度 显示离中心距离的位置 显示数量
+    geohash 将二维的经纬度转换为一维的字符串
+	如果两个字符串越接近，那么距离越近
+	geo底层是zset 可以用其操作集合
+	zrange china:city 0 -1 查看所有信息
 ---------------------------------------------------
-group by
-where 高于having能写在where限定的条件就不要去having限定
-------------------------------------
-慢查询
-long_query_time 默认大于10秒的执行sql时间
-show variables like '%slow_query_log%' 
-查询所有慢数据设置参数(开启，地址...)
-set global slow_query_log=1 开启，（只有当前数据库关机关闭）
-
-show variables like 'long_query_time%' 查看参数
-set global long_query_time=3 修改参数（重新连接才能展示修改值）
-
-show GLOBAL STATUS LIKE '%Slow_queries%'
-查询慢查询的条数
-
-mysqldumpslow 日志慢查询
-
-函数有返回值，存储过程没有返回值
-
-------------------------------------
-批量数据脚本
-
-delimiter $$
-create function range(n int) return varchar(255)
-begin
-return 
-end $$
-delimiter $$ 定义结束符
-------------------------------------
-show profile
-默认情况下处于关闭状态，并保存最近的12次运行结果
-
-set profiling=on开启查看日志
-
-show PROFILES
-展示操作日志
-show PROFILE cpu,block io for QUERY 1
-展示
-converting HEAP to myisam 查询结果太大，内存不够搬入磁盘
-creating tmp table 创建临时表
-copying to tmp table on disk 把内存中临时表复制到磁盘，危险！！
-Locked
-------------------------------------
-全局查询日志
-	永远不要在生产环境开启这个功能
-set global general_log=1;
-开启
-set global log_output='TABLE'
-记录到 general_log表
-select * from mysql.general_log
-------------------------------------
-锁
-表锁(myisam偏多)：
-	读锁（共享锁）：当前用户仅能读当前表，不能修改，不能读其他表；其他用户修改阻塞等待性能降低，读自由。
-
-	写锁（排他锁）：当前写操作没有完成前，其他都不能操作，当前可以增改查
+hyperloglog
+	什么是基数
+		不重复的元素
+	基数统计的算法
+	占用的内存是固定的，2^64不同的元素的技术，只需要12kb内存
+	pfadd mykey a b c d  添加一个key
+	pfcount mykey  统计key的数量
+	pfmerge  mykey mykey2 求两个集合的并集
 	
-	简而言之，就是读锁会阻塞写，但是不会阻塞读，而写锁则会把读和写都堵塞。
+	如果允许容错，那么一定可以使用hyperloglog
+	如果不允许容错，那么使用set或者自己的数据类即可
+----------------------------------------------------
+bitmaps 
+	位存储
+	统计用户信息，活跃，不活跃！登录，未登录！
+	打卡，365打卡！两个状态都可以使用bitmaps！
+	bitmaps位图，数据结构，都是操作二进制来进行记录，就只有0和1两个状态
+	365=365bit 8bit=1字节
+	setbit
+	getbit
+	bitcount 统计为1的数量
+----------------------------------------------------
+事务
+	要么同时成功，要么同时失败，原子性
 	
-	show open tables 哪些锁被加锁了 1为加锁
-	lock table mylock read; 给mylock加读锁
-	unlock tables; 解锁
-	update mylock set name='a2' where id=1
-	lock table mylock write; 写锁
+	redis单条命令式保存原子性，但是事务不保证原子性
 	
-	SHOW status like 'table%';
+	一组命令的集合，一个事务中的所有命令都被序列化，
+	在事务执行过程中，会按照顺序在执行
+	redis事务中没有隔离级别的概念
+	所有的命令在事务中，并没有直接执行，只有发起执行命令才会执行
+	redis的事务
+		开启事务
+		命令入队  multi
+		执行事务
+
+127.0.0.1:6379> multi
+OK
+//命令入队
+127.0.0.1:6379> set k1 v1
+QUEUED
+127.0.0.1:6379> set k2 v2
+QUEUED
+127.0.0.1:6379> get k2
+QUEUED
+127.0.0.1:6379> set k3 k3
+QUEUED
+127.0.0.1:6379> exec
+
+127.0.0.1:6379> multi
+OK
+127.0.0.1:6379> set k1 v1
+QUEUED
+127.0.0.1:6379> set k2 v2
+QUEUED
+//取消事务
+127.0.0.1:6379> discard
+OK
+127.0.0.1:6379> get k1
+(nil)
+
+命令出错  --事务所有的命令不执行
+运行时错误时
+
+悲观锁
+	很悲观，什么时候都会出现问题，无论什么时候都会加锁
+乐观锁
+	不会上锁，更新数据的时候去判断，再此期间是否有人修改过数据
+	mysql(version)!
+redis测监视测试
+127.0.0.1:6379> watch money
+OK
+127.0.0.1:6379> multi
+OK
+127.0.0.1:6379> decrby money 20
+QUEUED
+127.0.0.1:6379> INCRBY out 20
+QUEUED
+127.0.0.1:6379> exec
+
+测试多线程修改值，使用watch可以当作redis的乐观锁的操作
+unwatch  解除控制
+watch是一次性
+
+---------------------------------------------------------
+
+springboot整合
+	使用jedis pool连接池  bio
+	lettuce :采用netty，实例可以在多个线程中进行共享
+	opsForValue 操作string
+	opsForSet
+	opsForGeo
+	opsForZset
+	opsForHash
+	opsForHyperLogLog
+	//常用的操作
+	
+	获取redis的连接对象
+	RedisConnection connection = redisTemplate.getConnectionFactory().getConnection();
+		connection.flushDb();
+		connection.flushAll();
+
+	默认的序列化的方式是
+	所有的对象需要序列化
+	
+	真实的开发中，公司自己封装redis
+	
+------------------------------------------------------
+	usr:	unix software resource
 -------------------------------------------
-行锁（偏向innodb）：
-事务asid:原子性，一致性，隔离性，持久性
+redis.conf
+1.配置单位unit单位对大小写不敏感
+2.可以包含其他的配置文件
+3.bind 绑定的ip
+protected-mode yes 保护模式
+port 端口
+通用
+genetal
+daemonize yes 守护线程的方式运行
 
-更新丢失：
-脏读：读到已修改尚未提交的数据
-不可重复读：事务a读取到事务b已经提交的修改数据，不符合隔离性
-幻读：读到新增数据
+日志
+loglevel notice
+logfile 日志的文件位置名
+database 16 数据库的数量，默认是16
+always-show-log yes 是否总是显示logo
 
-未提交读
-已提交读
-可重复读
-可序列化读
+快照
+redis是内存数据库，如果没有持久化，断电即失
+save 900 1 
+900s内 
+config set requirepass 123456
+设置密码，默认是没有密码
+auth 123456登录
+config get requirepass得到所有的密码
+-------------------------
+rdb 保存的是dump.rdb的文件
+	触发机制：
+		1.save 的规则满足情况下，会自动触发rdb规则
+		2.执行flushall
+		3.退出redis
+	自动生成dump.rdb
+	优点：1.适合大规模的数据恢复！
+	2.对数据的完整性要求不高
+	缺点：
+	1.需要一定的时间间隔进程！如果redis意外宕机，最后一次修改数据就没有了
+	2.fork进程时，会占用一定内存空间
+aof
+将我们所有命令都记录下来
+以日志的形式来记录每个写操作
+默认是不开启的，我们需要手动配置appendonly 改为yes
+生成appendonly.aof
+aof被破坏不能启动redis
+redis-check-aof --fix appendonly.aof 修复日志文件
+	优点：
+		1。每一次修改都同步，文件的完整会更好
+		2.每秒同步一次，可能会丢失一秒的数据
+		3.从不同步，效率最高
+	缺点：
+		1.相当于数据文件来说，aof远远大于rdb，修复的速度也比rdf慢！
+		2.aof运行效率也要比rdb慢，所有我们redis默认配置是rdb持久化！
 
-set autocommit=0;
+	追加覆盖，数据库恢复
+	文件追加方式==》导致文件越来越大
+	rewrite 重写  优化重写+覆盖
+	fork 重写（优化）文件 rename覆盖 
+	哪个好
+		官方推荐同时使用
+		数据不敏感使用rdb
+		不建议单独使用aof，出现bug
+		如果纯内存缓存，可以都不用
+----------------------------------------
+redis 发布订阅
+发送者pub发送消息，订阅者(sub)接收信息
+第一个：消息发送者，第二个：频道，第三个：消息接收者
 
-CAS compare and swap 线程加版号
-
-
-CAP
-一致性(consistency)
-可用性(availability)
-分区容错性(partition tolerance)
-
-行锁，大路朝天，各走一边，只会在一行进行操作
-
-行锁变表锁
-	索引失效导致行锁变表锁
-	for update 排他锁
+订阅端：subscribe zhang
+	等待读取推送信息
+发送端：publish zhang "hello word"
+	发送信息
 	
----------------------------------
-间隙锁
-	当我们用范围条件而不是相等条件检索数据，并请求共享 或排他锁时，innodb会给符合条件的已有数据记录的索引项加锁；对于键值在条件范围内但并不存在的记录，叫做“间隙GAP”
+	1.实时消息系统！
+	2.实时聊天
+	3.订阅，关注系统
+	复杂一点使用 中间件
+----------------------------------------
+Redis 主从复制
+	1主人 2仆人（1主2从）
+	单向数据流
 	
-	innodb也会对这个“间隙”加索，这种锁机制就是所谓的间隙表(next-key锁)
-	某些情况会对效率产生严重损害
------------------------------------
-for update (将所有查询到的数据加上排它锁)
+	主从复制作用：
+		1.数据冗余
+		2.故障恢复
+		3.负载均衡
+		4.高可用（集群）
+	单台服务器内存不要超过20g
+环境配置
+	只配置从库
+
+--------------info replication
+# Replication
+role:master
+connected_slaves:0
+master_replid:5c6996d0d55f238f767d17463ac7d15cbc279800
+master_replid2:0000000000000000000000000000000000000000
+master_repl_offset:0
+second_repl_offset:-1
+repl_backlog_active:0
+repl_backlog_size:1048576
+repl_backlog_first_byte_offset:0
+repl_backlog_histlen:0
+
+1.端口名
+2.pid名（PID代表了各进程的进程ID,PID就是各进程的身份标识）
+3.log文件名字
+4.dump名
+[root@192 bin]# ps -ef|grep redis
+happy      4834      1  0 06:51 ?        00:00:03 redis-server 127.0.0.1:6379
+root       5460      1  0 07:26 ?        00:00:00 redis-server 127.0.0.1:6380
+root       5480      1  0 07:27 ?        00:00:00 redis-server 127.0.0.1:6381
+
+------------------salveof no one自己当老大，如果老大自己重启需要自己重新配置
+
+细节：
+	主机可以写，从机不能写只能读
+		
+	层层链路
+------------------------
+哨兵模式
+sentinel moitor myredis 127.0.0.1 6379 1
+
+如果主机回来了，会自动充当主机
+
+优点：
+	1.哨兵集群，基于主从复制模式，所有的主从配置优点，它全有
+	2.主从可以切换，故障可以转移，
+	3.哨兵模式就是主从模式的升级，手动到自动，更加健壮
+缺点：
+	1.redis不好扩容，集群容量一旦到达上限，在线扩容十分麻烦
+	2.配置复杂
+--------------------------
+redis缓存穿透和雪崩（服务高可用）
+	缓存击穿：热点，量太大，缓存过期  热点数据不过期/分布式锁
+	缓存穿透：  布隆过滤器/空对象
+	缓存雪崩：redis 宕机，缓存集中过期
+	解决方案：1。异地多活，增加服务器
+	2.限流降级，缓存失效后，加锁或者队列 控制读数据库写缓存的线程数量
+	3.数据预热：预先访问，找到热点，提前加入缓存
+		
 	
-	show status like 'innodb_row_lock%'; 展示行锁参数
-	
-优化建议：
-	1.尽可能让所有数据检索都通过索引来完成，避免无索引行锁升级为表锁
-	2.合理设计索引，尽量缩小锁的范围
-	
-	3.尽可能较少检索条件，避免间隙锁
-	
-	4.尽量控制事务大小，减少锁定资源量和时间长度
-	
-	5.尽可能低级别事务隔离
-	
----------------------------------
-页锁
--------------------------------
-主从复制
-	条件：
-	1.mysql版本一致且后台以服务运行，同一网段
-	2.主机：my.ini
-		1.主服务器id唯一 server-id
-		2.日志启动二进制文件
-		3.启动错误日志
-		4.根目录
-		5.临时目录
-		6.数据目录
-		8.设置不要复制的数据库
-		9.设置需要复制的数据库
-	3.从机 my.cnf
-		1.从服务器唯一 server-id
-		2.启动二进制日志
-		3.配置为重启服务器
-		4.关闭防火墙
-		5.windows授权从机slave权限 flush privileges
-		show masetr status 展示主服务器状态
-		6.配置从机读取主机数据同步配置
-		7.start slave
-		8.show slave status
-		stop slave停止从机
------------------------------------
-myisam 索引记录的是数据地址，一定程度上可以直接拿去数据
-
-innodb 索引记录的是主键，需要回表查询
-支持事务，采用行级锁
-
-缓存穿透：都没有数据
-
-
-
 
 
 
 	
 	
+连接外网首先有在redis.conf改几个设置
+1.daemonize yes
+2.注释 bind 127.0.0.1
+3.protected-mode no
+其次看一下自己防火墙对端口号开没开放
+firewall-cmd --query-port=6379/tcp
+如果是yes就是开放的
+然后 redis-server lconfig/redis.conf
+redis-cli -h 自己外网端口号 -p 6379
+最后ping一下如果pong就成功了
+		
 	
+	
+ 
+		
+		
 
-
+		
