@@ -1,0 +1,134 @@
+正向代理
+	浏览器配置代理服务器
+	多对一
+反向代理
+	一对多
+
+负载均衡
+	客户端发送多个请求，服务端拿到数据返回给客户端。
+	
+动静分离
+把静态资源和动态资源分离
+动态资源放到tomcat
+静态资源直接放静态资源服务器中，降低之前服务器的压力
+	
+	
+操作的常用命令
+		进入到nginx的目录 /nginx/sbin
+	1../nginx -v 查看版本
+	2../nginx -s stop 关闭
+	3../nginx 开启
+	4.重写加载nginx
+		./nginx -d reload
+nginx的配置文件conf/nginx.conf
+	三部分:
+			1.全局快
+				到events块之前
+				设置服务器整体运行的配置指令
+			2.events块
+				服务器域用户的网络的连接数量
+					
+			3.http块
+				http全局块
+					
+				server块
+					全局server块
+					location
+nginx反向代理
+			访问过程：
+				host文件中配置域名映射的ip地址
+				nginx访问地址
+					listen：访问端口
+					server_name:nginx的服务器路径
+					转发proxy_pass 路径
+				访问到linux
+				
+ps -ef | grep nginx
+ps -ef 表示显示所有进程的消息
+管道命令的作用是将command 1 执行的结果，交给command 2 处理，以此内推。所以 
+grep nginx 表示的是在所有进程的消息查询名字为nginx的进程。
+http{
+	upstream myserver{
+		server 198.168.17.129:8080;
+		server 198.168.17.129:8081;
+	}
+	server{
+		listen：9001
+		server_name:198.168.17.129
+		location ~ /{
+			proxy_pass http://myserver
+		}				
+		
+	}
+}
+分配服务器策略
+1.轮询
+按照时间顺序分配，默认选择
+2.weight
+权重越高越多次访问，默认1
+3.ip_hash
+每个请求按访问ip的hash结果分配，这样每个
+访客“固定”访问一个后端服务器，可以解决session的问题
+（前提访问成功）
+4.fair
+按照后端服务器响应时间来分配，响应时间短的优先匹配
+==================================================
+动静分离
+expire参数设置浏览器缓存过期时间
+（浏览器将静态资源加入缓存）
+对比服务器文件更新时间没有变化
+成功304,文件修改从服务器重新下载，返回状态码200
+autoindex on  
+
+==============================================================
+=：用于不含正则表达式的uri前，要求请求字符串与uri严格匹配，如果
+匹配成功，就停止继续向下搜索并立即处理该请求
+~:用于表达url包含正则表达式，并且区分大小写
+~*:用于表达url包含正则表达式，并且不区分大小写
+^~:用于不含正则表达式的uri前，要求Nginx服务器找到标识uri和请求
+字符串匹配度的location后，立即使用location处理请求，而不再使用
+location块中的正则uri和请求字符串做匹配
+==============================================================
+nginx高可用
+slave从属
+配置高可用的环境
+安装keepalive！！！！
+
+==============================================================
+
+nginx 配置文件修改完之后。重启起效果
+
+==============================================================
+nginx原理
+1.master和worder
+2.worker如何进行工作
+		worker
+		
+master 	worker
+
+		worker
+		
+管理/监控	争抢
+3.一个master和多个worker
+1）nginx -s reload 热部署
+	
+2）独立的进程，不需要加锁，不影响其他的服务
+
+3）设置多少个worker合适
+io多路复用（仅有linux有）
+设置的数量和cpu数量相同
+4）连接数work_connection
+发送请求，占用了worker的几个连接数？
+答：2或者4个
+worker最大的连接的数 (4*1024)/4or2
+静态
+worker_connections * worker_process/2
+反向代理
+worker_connections * worker_process/4
+
+1. worker_processes 8;
+nginx 进程数，建议按照cpu 数目来指定，一般为它的倍数 (如,2个四核的cpu计为8)。
+2. worker_connections 65535;
+每个进程允许的最多连接数， 理论上每台nginx 服务器的最大连接数为65535
+	
+					
