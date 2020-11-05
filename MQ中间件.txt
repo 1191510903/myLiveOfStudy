@@ -1,4 +1,8 @@
 消息中间件
+和dubbo等RPC的区别
+1.一个同步一个异步
+2.一个注重及时通信一个注重缓存
+3.
 
 MQ:消息中间件
 activemq
@@ -62,9 +66,9 @@ JMS开发的基本步骤
 topic
 先启动消费者后启动生产者
 
+===================================
 javaEE :13个规范工业规范
-JMS 
-两个应用程序之间进行异步通信的API
+JMS：两个应用程序之间进行异步通信的API
 
 JMS prodiver 中间件
 JMS producer 生产者
@@ -89,21 +93,88 @@ JMS message 消息
 		5.ObjectMessage
 
 消息的可靠性
-	1.持久:默认是持久（可靠性为主）
+	1.持久:queue默认是持久（可靠性为主）
+	topic 持久话订阅	一定要先运行一次消费者，进行注册clientID
 	2.事务 
-	3.
-	4.broken
+		ACID:原子、一致、隔离、持久
+		事务：
+		1.生产者send commit之前不会再进行发布
+		失败rollback	2.消费者开启，commit之前会重复消费
+	3.签收（偏消费者）
+		自动签收 auto_ACKNOWLEDGE
+		手动签收 CLIENT_ACKNOWLEDGE
+		允许重复签收
+		acknowledge
+		
+		事务提交后自动签收
+		签收之后未提交依旧重复读
+		
+		事务优先级》签收优先级
+	4.broker
+		嵌入式broker,mq的实例
+		BrokerServer broker = new BrokerServer();
+		broker.setUseJmx(true)	broker.addConnect(localhost:61616)
+		broker.start();
+===================================
+spring整合ActiveMQ
+	 
+pub-sub-main false:queue true:topic
+
+springboot整合ActiveMQ
+===================================
+ActiveMQ传输协议
+	主要协议：
+		1.TCP:默认使用
+		通过wire protocol（openWire）的序列化成字节流,促进网络效率和数据快速交互
+		2.NIO:侧重底层访问
+		3.AMQP
+		4.stomp
+		5.ssl
+		6.MQTT
+		7.ws
+NIO:61618
 
 
+加强NIO:auto:61608
 
-
-
-
-
-
- 
-
-
+===================================
+消息持久化理论
+	JDBC/LevelDB/KahaDB(默认-日志文件)
+	
+	kahaDB:
+		消息存储使用一个事务日志和仅仅用一个索引B树文件进行存储
+		db-1.log 存储日志文件
+		db.data  索引文件
+		db.free  显示空页id
+		db.redo 日志恢复
+		lock  锁
+		
+	JDBC:
+		MQ+MQSQL
+			1.添加mysql.jar  lib包
+			2.xml  createTablesOnStartup 自动建表
+			3.bean
+		ACTIVEMQ_MSGS 消息（topic订阅的不删除）
+		ACTIVEMQ_ACKS 队列的名字
+		ACTIVEMQ_LOCK 集群主从
+	
+	jdbc-journal  加入缓存
+=================================
+	高可用：
+		1.高可用集群(very fast)	zookeeper+replicated-levelDB-store
+		2.jetty.xml
+		
+		
+	losf -i 端口号
+	grep -v grep
+================================	1.如何保证其高可用：zookeeper+replicated-levelDB-store
+2.什么是异步投递
+	useAsyncSend=true
+3.如何确定异步投递发送成功？
+	接收回执
+4.什么是延迟投递和定时投递？
+	
+	
 
 
 
