@@ -173,10 +173,34 @@ NIO:61618
 3.如何确定异步投递发送成功？
 	接收回执
 4.什么是延迟投递和定时投递？
+	四大属性：
+		延迟投递时间
+		重复投递时间
+		重复投递次数
+		Cron表达式
+	消息属性设置 setLongProperty
+				 setIntProperty
+5.重发机制
+	1.rollback
+	2.commit之前，没有commit
+	3.在CLIENT_ACKNOWLEDGE的传递模式下，在session中调用了recover()
 	
+		间隔：1
+		次数：6
+		有毒消息Poison ACK
+		超过6次定义有毒，broker把消息放到DLQ（死信队列）
+6.死信队列
+	处理失败消息的集合
+		配置案例：
+			自动删除过期消息
+			存放非持久信息到死队列中
+7.如何保证信息重复消费？幂等
+			1.插入操作，设置主键
+			2.第三方服务去存储 例如：redis key-value存储信息
+			3.锁
+			
 	
-
-
+			
 
 
 
