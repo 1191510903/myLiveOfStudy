@@ -1,0 +1,24 @@
+selector 、 channel 、Buffer
+1.每个channle 都对应一个buffer
+2.selector 对应一个线程，一个线程对应多个channel
+3.程序切换到哪个channel 是由事件决定的	"Event"
+4.selector会根据不同的事件，在各个通道上切换
+5.Buffer就是一个内存块，底层是有一个数组
+6.数据的读取写入时通过buffer,和bio不同。可以同时读写
+需要flip方法切换
+7.channel 是双向的，可以返回底层操作系统的情况，底层的操作系统通道就是双向
+==============
+缓冲区
+本质是一个可以读写的内存块数组
+mark
+position
+limit
+capacity
+
+ByteBuffer(最常用)
+===========
+Channel
+	NIO的通道类似于流	
+		1.双向
+		2.异步
+		3. 
