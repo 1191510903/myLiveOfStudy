@@ -66,11 +66,73 @@ reactor模型
 	1.reactor在一个单独的线程中运行
 	2.eventHandler：处理程序执行i/o实际处理的事件
 
-reactor 线程模型
+reactor 单线程模型
 reactor 多线程模型
-reactor 
+reactor 主从reactor多线程
+
+1）netty抽象出两组线程池
+	bossGroup 客户端连接
+	workerGroup 专门负责网络的读写
+2）NioEventLoopGroup 事件循环组  		
+3）NioEventLoopGroup  表示一个不断循环的执行处理任务的线程
+存在多个NioEventLoop
+==========================
+传统阻塞i/o 服务模型
+==================
+异步模型
+异步的概念和同步相对
+future
+1）表示异步的执行结果，可以通过它提供的方法监测执行是否完成
+2) ChannelFuture是一个接口
+	当监听的事件发生时，就会通知到监听器
+链式操作系统
+	读取数据-数据处理（编码)-数据传输-数据处理（解码）
+future-listener 机制
+====================================
+netty 核心组件
+
+Bootstrap 引导
+group 设置服务组
+channel 设置服务端的通道
+childOption  通道添加配置
+childHandler 对应的workerGroup
+
+Channel() 拿到当前io操作的通道
+
+selector 
+
+pipeline:
+addFirst
+addLast 把业务放进管道中
+	
+ChannelHandlerContext
+NioEventLoopGroup 	
+Unpooled  用来操作缓冲区容器
+ByteBuf
+	readIndex  读索引
+	writeIndex  写索引
+	capacity  数组长度
+创建byteBuf
+ByteBuf buffer = Unpooled.copiedBuffer;
 
 
+心跳检测机制
+  // IdleStateHandler 是netty 提供的处理空闲状态的处理器
+  
+ netty 通过websocket编程实现服务器和客户端长连接
+ 
+ 编码和解码的基本介绍
+ 1.数据传输为二进制，发送数据要编码，接收数据要解码
+ 2.netty使用java序列化进行编解码
+ 3.Geogle ProtoBuf -谷歌开源项目 适合RPC   
+http+json ->tcp+protoBuf
+
+childHandler进行数据入栈/出栈链的容器
+TCP 粘包拆包
+	
+handler
+client:编码：接收-代码-编码-发送
+server:解码: 解码-代码-读取-发送
 
 
 
